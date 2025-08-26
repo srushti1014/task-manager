@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
-// GET single category
+// GET single category1
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
