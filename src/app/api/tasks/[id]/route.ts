@@ -8,7 +8,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params;
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const task = await prisma.task.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       include: { category: true, tags: true },
     });
 
@@ -45,7 +45,7 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params;
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -67,7 +67,7 @@ export async function PUT(
 
     // First, verify the *TASK* belongs to the user
     const existingTask = await prisma.task.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
     });
     if (!existingTask) {
       return NextResponse.json(
@@ -92,7 +92,7 @@ export async function PUT(
     // A transaction = group of queries that run all or none.
     const updatedTask = await prisma.$transaction(async (tx) => {
       await tx.task.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
           title,
           description,
@@ -105,14 +105,14 @@ export async function PUT(
 
       // Handle tags - first remove existing relationships
       await tx.taskTag.deleteMany({
-        where: { taskId: params.id },
+        where: { taskId: id },
       });
 
       // Then create new relationships with validated tags
       if (validTagIds.length > 0) {
         await tx.taskTag.createMany({
           data: validTagIds.map((tagId: string) => ({
-            taskId: params.id,
+            taskId: id,
             tagId,
           })),
         });
@@ -120,7 +120,7 @@ export async function PUT(
 
       // Fetch the complete updated task with relationships
       return tx.task.findUnique({
-        where: { id: params.id },
+        where: { id: id },
         include: {
           category: true,
           tags: {
@@ -145,9 +145,10 @@ export async function PUT(
 // DELETE task
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -158,11 +159,11 @@ export async function DELETE(
 
     await prisma.$transaction(async (tx) => {
       await tx.taskTag.deleteMany({
-        where: {taskId: params.id}
+        where: {taskId: id}
       })
 
       await tx.task.delete({
-        where: {id : params.id}
+        where: {id : id}
       })
     })
 

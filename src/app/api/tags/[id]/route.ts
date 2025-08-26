@@ -8,7 +8,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params;
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
@@ -17,7 +17,7 @@ export async function GET(
       );
 
     const tag = await prisma.tag.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       include: { tasks: true },
     });
 
@@ -43,7 +43,7 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params;
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
@@ -59,7 +59,7 @@ export async function PUT(
       where: { 
         name, 
         userId: session.user.id, 
-        NOT: { id: params.id }  // exclude current tag
+        NOT: { id: id }  // exclude current tag
       },
     });
 
@@ -71,7 +71,7 @@ export async function PUT(
     }
 
     const updatedTag = await prisma.tag.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { name, color },
     });
 
@@ -89,9 +89,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
@@ -101,7 +102,7 @@ export async function DELETE(
 
     // Check if tag belongs to user
     const tag = await prisma.tag.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
     });
 
     if (!tag)
@@ -111,7 +112,7 @@ export async function DELETE(
       );
 
     // Delete tag
-    await prisma.tag.delete({ where: { id: params.id } });
+    await prisma.tag.delete({ where: { id: id } });
 
     return NextResponse.json({ success: true, message: "Tag deleted" });
   } catch (error) {
