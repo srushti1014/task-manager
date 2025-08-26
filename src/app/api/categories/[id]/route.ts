@@ -5,10 +5,10 @@ import { auth } from "@/auth";
 // GET single category
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
+  
 ) {
   try {
-    const params = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
