@@ -2,14 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
-// GET single category1
-type Params = { id: string };
+// GET single category
 export async function GET(
   req: NextRequest,
-  context: { params: Params } | { params: Promise<Params> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await Promise.resolve(context.params);
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
@@ -18,7 +17,7 @@ export async function GET(
       );
 
     const category = await prisma.category.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       include: { tasks: true },
     });
 
@@ -41,10 +40,11 @@ export async function GET(
 // UPDATE category
 export async function PUT(
   req: NextRequest,
-  context: { params: Params } | { params: Promise<Params> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await Promise.resolve(context.params);
+     const { id } = await context.params;
+    // const params = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
@@ -53,20 +53,20 @@ export async function PUT(
 
     // Check ownership
     const category = await prisma.category.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
     });
     if (!category)
       return NextResponse.json({ success: false, message: "Category not found" }, { status: 404 });
 
     // Check for duplicate name (excluding current category)
     const existing = await prisma.category.findFirst({
-      where: { name, userId: session.user.id, NOT: { id: params.id } },
+      where: { name, userId: session.user.id, NOT: { id: id } },
     });
     if (existing)
       return NextResponse.json({ error: "Category with this name already exists" }, { status: 400 });
 
     const updatedCategory = await prisma.category.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { name, color },
     });
 
