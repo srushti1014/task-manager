@@ -3,13 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 // GET single category1
-
+type Params = { id: string };
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
-  
+  context: { params: Params } | { params: Promise<Params> }
 ) {
   try {
+    const params = await Promise.resolve(context.params);
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json(
@@ -41,9 +41,10 @@ export async function GET(
 // UPDATE category
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Params } | { params: Promise<Params> }
 ) {
   try {
+    const params = await Promise.resolve(context.params);
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
