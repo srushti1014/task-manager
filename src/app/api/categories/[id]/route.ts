@@ -84,22 +84,23 @@ export async function PUT(
 // DELETE category
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+     const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id)
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
     // Check ownership
     const category = await prisma.category.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
     });
     if (!category)
       return NextResponse.json({ success: false, message: "Category not found" }, { status: 404 });
 
     // Delete category
-    await prisma.category.delete({ where: { id: params.id } });
+    await prisma.category.delete({ where: { id: id } });
 
     return NextResponse.json({ success: true, message: "Category deleted" });
   } catch (error) {
