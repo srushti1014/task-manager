@@ -100,6 +100,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
               id="description"
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+              required
             />
           </div>
 

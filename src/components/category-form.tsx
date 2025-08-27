@@ -30,8 +30,8 @@ export function CategoryForm({ category, isOpen, onClose, onSubmit }: CategoryFo
     "#ea580c", // Orange-600
     "#65a30d", // Lime-600
     "#4f46e5", // Indigo-600
-    "#0d9488", // Teal-600
-    "#b45309", // Amber-600
+    "#284553", // Teal-600
+    "#FFB701", // Amber-600
     "#4338ca", // Indigo-700
     "#0369a1", // Blue-700
     "#15803d", // Green-700

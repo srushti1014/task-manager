@@ -82,7 +82,21 @@ const Taskcard = ({
     }
   };
 
+  function getProgressPercent(status: string) {
+    switch (status) {
+      case "PENDING":
+        return 0;
+      case "IN_PROGRESS":
+        return 50;
+      case "COMPLETED":
+        return 100;
+      default:
+        return 0;
+    }
+  }
+
   const StatusIcon = getStatusIcon(task.status);
+  const percent = getProgressPercent(task.status);
 
   return (
     <Card
@@ -213,15 +227,15 @@ const Taskcard = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{70}%</span>
+            <span className="font-medium">{percent}%</span>
           </div>
           <Progress.Root
-            value={70}
+            value={percent}
             className="relative overflow-hidden bg-secondary rounded-full w-full h-2"
           >
             <Progress.Indicator
               className="bg-primary w-full h-full transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${100 - 70}%)` }}
+              style={{ transform: `translateX(-${100 - percent}%)` }}
             />
           </Progress.Root>
         </div>

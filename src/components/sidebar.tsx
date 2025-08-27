@@ -2,40 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   CheckSquare,
   FolderOpen,
   Tag,
   Menu,
   X,
-  Settings,
   Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface SidebarProps {
-  taskCounts?: {
-    total: number;
-    pending: number;
-    inProgress: number;
-    completed: number;
-  };
-}
-
-export function Sidebar({
-  taskCounts = { total: 0, pending: 0, inProgress: 0, completed: 0 },
-}: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed on mobile
+export function Sidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
 
-  // Detect mobile devices
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+      setIsMobile(window.innerWidth < 1024); 
     };
 
     checkMobile();
@@ -43,7 +29,6 @@ export function Sidebar({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close sidebar when route changes on mobile
   useEffect(() => {
     if (isMobile) {
       setIsCollapsed(true);
@@ -62,7 +47,6 @@ export function Sidebar({
       label: "Tasks",
       icon: CheckSquare,
       href: "/tasks",
-      count: taskCounts.total,
     },
     {
       id: "categories",
@@ -75,24 +59,6 @@ export function Sidebar({
       label: "Tags",
       icon: Tag,
       href: "/tags",
-    },
-  ];
-
-  const taskStats = [
-    {
-      label: "Pending",
-      count: taskCounts.pending,
-      color: "bg-yellow-100 text-yellow-800",
-    },
-    {
-      label: "In Progress",
-      count: taskCounts.inProgress,
-      color: "bg-blue-100 text-blue-800",
-    },
-    {
-      label: "Completed",
-      count: taskCounts.completed,
-      color: "bg-green-100 text-green-800",
     },
   ];
 
@@ -109,7 +75,7 @@ export function Sidebar({
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
           onClick={handleOverlayClick}
-          style={{ touchAction: "none" }} // Prevent scrolling when overlay is visible
+          style={{ touchAction: "none" }} 
         />
       )}
 
@@ -122,7 +88,6 @@ export function Sidebar({
           "lg:relative lg:translate-x-0 lg:z-auto"
         )}
         style={{
-          // Prevent mobile address bar issues
           height: isMobile ? "100dvh" : "100vh",
         }}
       >
@@ -149,91 +114,46 @@ export function Sidebar({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 
               return (
-                <div key={item.id} className="space-y-1">
+                <div key={item.id} className="py-1">
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 w-full h-12 px-3 rounded transition-colors duration-200",
+                      "flex items-center gap-3 w-full h-12 px-3 rounded-lg transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 shadow-sm"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       isCollapsed && !isMobile && "justify-center px-2"
                     )}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     {(!isCollapsed || isMobile) && (
-                      <>
-                        <span className="flex-1 text-left text-base">
-                          {item.label}
-                        </span>
-                        {item.count !== undefined && (
-                          <Badge variant="secondary" className="ml-auto">
-                            {item.count}
-                          </Badge>
-                        )}
-                      </>
+                      <span className="flex-1 text-left text-base truncate">
+                        {item.label}
+                      </span>
                     )}
                   </Link>
                 </div>
               );
             })}
           </nav>
-
-          {/* Task Statistics - Only show when not collapsed */}
-          {(!isCollapsed || isMobile) && pathname === "/tasks" && (
-            <div className="p-4 border-t border-sidebar-border">
-              <h3 className="text-sm font-medium text-sidebar-foreground mb-3">
-                Task Overview
-              </h3>
-              <div className="space-y-2">
-                {taskStats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-sm text-sidebar-muted-foreground">
-                      {stat.label}
-                    </span>
-                    <Badge className={stat.color}>{stat.count}</Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="p-4 border-t border-sidebar-border">
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-3 h-12 text-sidebar-foreground hover:bg-sidebar-accent",
-                isCollapsed && !isMobile && "justify-center px-2"
-              )}
-            >
-              <Settings className="w-5 h-5" />
-              {(!isCollapsed || isMobile) && (
-                <span className="text-base">Settings</span>
-              )}
-            </Button>
-          </div>
         </div>
       </div>
-
       {/* Mobile menu button - Only show when sidebar is completely hidden */}
       {isCollapsed && isMobile && (
         <button
-          className="fixed top-3 left-3 z-40 lg:hidden h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center"
+          className="fixed top-7 left-3 z-50 lg:hidden h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center"
           onClick={() => setIsCollapsed(false)}
         >
           <Menu className="w-4 h-4 text-white" />
         </button>
       )}
+
     </>
   );
 }

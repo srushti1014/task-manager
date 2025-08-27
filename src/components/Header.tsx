@@ -10,9 +10,9 @@ export default function Header() {
   const { data: session, status } = useSession()
 
   return (
-    <header className="bg-card border-b border-border p-6 z-50">
+    <header className="bg-card border-b border-border p-6 z-40">
       <div className="flex items-center justify-between">
-        <div className="ml-8 md:ml-0">
+        <div className="ml-8 lg:ml-0">
           <h1 className="text-lg md:text-2xl font-bold text-foreground">TaskFlow</h1>
           <p className="text-xs md:text-lg text-muted-foreground mdL:mt-1">Manage your tasks efficiently</p>
         </div>

@@ -22,22 +22,37 @@ interface TagFormProps {
 export function TagForm({ tag, isOpen, onClose, onSubmit }: TagFormProps) {
   const [loading, setLoading] = useState(false);
   const colorOptions = [
-    "#10b981", // Emerald green
-    "#f59e0b", // Amber
-    "#ef4444", // Red
-    "#06b6d4", // Cyan
-    "#f97316", // Orange
-    "#ec4899", // Pink
-    "#8b5cf6", // Purple
-    "#84cc16", // Lime green
-    "#3b82f6", // Blue
-    "#6366f1", // Indigo
-    "#14b8a6", // Teal
-    "#f43f5e", // Rose
-    "#7c3aed", // Violet
-    "#0ea5e9", // Sky blue
-    "#22c55e", // Green
-    "#eab308", // Yellow
+    "#22e340", // Vibrant Emerald Green
+    "#ff6b6b", // Bright Coral Red
+    "#2ed9eb", // Bright Cyan
+    "#ff8c42", // Bright Orange
+    "#a2f236", // Vibrant Lime Green
+    "#7b7cff", // Periwinkle Blue
+    "#2cd5bd", // Bright Teal
+    "#ff6b9d", // Bright Rose
+    "#9d5cff", // Bright Violet
+    "#e2c9ff", // Soft Lavender
+    "#3cb4ff", // Bright Sky Blue
+    "#4cd964", // Apple Green
+    "#ffd644", // Bright Yellow
+    "#e8e6d9", // Soft Beige
+    "#fffbb5", // Bright Cream
+    "#ffb5e8", // Light Pink
+    "#a6e9ff", // Light Sky Blue
+    "#ff7eb5", // Bright Pink
+    "#5d9cff", // Bright Blue
+    "#c28c53", // Medium Brown
+    "#ffd1d4", // Soft Pink
+    "#a8e6cf", // Mint Green
+    "#ffb347", // Bright Amber
+    "#c9ffce", // Light Mint
+    "#ffcc99", // Peach
+    "#fff9a5", // Bright Lemon
+    "#6aebb3", // Seafoam Green
+    "#4ae0e6", // Bright Turquoise
+    "#7bc8ff", // Light Blue
+    "#b8b1ff", // Lavender Blue
+    "#d9a9ff", // Light Lilac
   ];
 
   const [formData, setFormData] = useState({ name: "", color: "#3b82f6" });
@@ -56,13 +71,13 @@ export function TagForm({ tag, isOpen, onClose, onSubmit }: TagFormProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return
+    if (!formData.name.trim()) return;
     try {
       setLoading(true);
       await onSubmit(formData);
       onClose();
     } catch (error) {
-      console.error("Error submitting category:", error)
+      console.error("Error submitting category:", error);
     } finally {
       setLoading(false);
     }
@@ -108,10 +123,11 @@ export function TagForm({ tag, isOpen, onClose, onSubmit }: TagFormProps) {
                 <button
                   key={color}
                   type="button"
-                  className={`w-8 h-8 rounded-full border-2 transition ${formData.color === color
+                  className={`w-8 h-8 rounded-full border-2 transition ${
+                    formData.color === color
                       ? "border-foreground shadow-md"
                       : "border-border"
-                    }`}
+                  }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setFormData((prev) => ({ ...prev, color }))}
                 />
@@ -148,7 +164,12 @@ export function TagForm({ tag, isOpen, onClose, onSubmit }: TagFormProps) {
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? "Loading..." : tag ? "Update" : "Create"}
             </Button>
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
           </div>
