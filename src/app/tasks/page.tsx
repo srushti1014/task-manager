@@ -30,7 +30,7 @@ import { toast } from "react-toastify";
 import Taskcard from "@/components/Taskcard";
 import EmptyState from "@/components/EmptyState";
 import Loader from "@/components/Loader";
-import { Plus, Search, Filter, X } from "lucide-react";
+import { Plus, Search, Filter, X, Check } from "lucide-react";
 
 interface TaskFilters {
   status: string;
@@ -51,7 +51,6 @@ export default function TasksPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  // const [filterLoading, setFilterLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -108,7 +107,7 @@ export default function TasksPage() {
         setTasks([]);
       }
     } catch (error) {
-      console.error("Failed to fetch tasks:", error);
+      console.error("Failed to fetch tasks :", error);
       setTasks([]);
     }
   };
@@ -267,14 +266,14 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
-          <p className="text-muted-foreground">
-            Manage your tasks and track progress
+          <h1 className="text-xl md:text-3xl font-bold">Tasks</h1>
+          <p className="text-muted-foreground text-xs md:text-lg">
+            Manager your tasks and mark your progress
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-5 md:mt-0 ">
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -283,8 +282,8 @@ export default function TasksPage() {
             <Filter className="w-4 h-4 mr-2" />
             Filters
             {hasActiveFilters && (
-              <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
-                !
+              <Badge className="ml-2 h-5 w-5 p-0 text-xs bg-amber-400">
+                <Check />
               </Badge>
             )}
           </Button>
@@ -300,13 +299,12 @@ export default function TasksPage() {
 
       {showFilters && (
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Filter Tasks</CardTitle>
               <div className="flex items-center gap-2">
                 {hasActiveFilters && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-1" />
                     Clear All
                   </Button>
                 )}
@@ -386,7 +384,7 @@ export default function TasksPage() {
 
             <div className="space-y-4 border-4 p-4 bg-[#0E1216]">
               {/* Search */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -401,27 +399,49 @@ export default function TasksPage() {
 
               {/* Tags */}
               {tags.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label>Tags</Label>
                   <div className="flex flex-wrap gap-2">
-                    {tags.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant={
-                          selectedTags.includes(tag.name) ? "default" : "outline"
-                        }
-                        className="cursor-pointer hover:bg-primary/80"
-                        onClick={() => handleTagToggle(tag.name)}
-                      >
-                        {tag.name}
-                      </Badge>
-                    ))}
+                    {tags.map((tag) => {
+                      const isSelected = selectedTags.includes(tag.name);
+                      const textColor = isSelected
+                        ? tag.color === "#000000" || tag.color === "#3178C6"
+                          ? "#FFFFFF"
+                          : "#000000"
+                        : tag.color;
+
+                      return (
+                        <span
+                          key={tag.id}
+                          style={{
+                            backgroundColor: isSelected
+                              ? tag.color
+                              : "transparent",
+                            color: textColor,
+                            borderColor: tag.color,
+                          }}
+                          className={`
+                            px-2.5 py-0.5 rounded-full text-xs font-medium border
+                            transition-all duration-200 cursor-pointer
+                            hover:opacity-90 hover:scale-105
+                            ${
+                              isSelected
+                                ? "ring-2 ring-offset-2 ring-offset-gray-900"
+                                : ""
+                            }
+                          `}
+                          onClick={() => handleTagToggle(tag.name)}
+                        >
+                          {tag.name}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               <button
-              className="py-1.5 px-2 bg-gray-200 text-black rounded-xl text-sm font-semibold cursor-pointer hover:bg-gray-500 hover:text-white transition-all duration-300"
+                className="py-1.5 px-2 bg-gray-200 text-black rounded-xl text-sm font-semibold cursor-pointer hover:bg-gray-500 hover:text-white transition-all duration-300"
                 onClick={() =>
                   setFilters((prev) => ({
                     ...prev,

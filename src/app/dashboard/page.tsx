@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { CheckCircle, Clock, AlertCircle, StickyNoteIcon } from "lucide-react"
 import type { Task } from "@/lib/types"
 import Loader from "@/components/Loader"
 
@@ -29,7 +29,6 @@ export default function DashboardPage() {
     setLoading(false)
   }
 
-
   const taskCounts = {
     total: tasks.length,
     pending: tasks.filter((t) => t.status === "PENDING").length,
@@ -53,7 +52,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <StickyNoteIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{taskCounts.total}</div>
