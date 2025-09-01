@@ -100,9 +100,10 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -111,7 +112,7 @@ export async function POST(
       );
     }
 
-    const taskId = params.id;
+    const taskId = id;
     const { emails, role } = await req.json();
 
     // 1. Verify that current user is owner of the task
