@@ -26,11 +26,13 @@ import {
   MoreHorizontal,
   PauseCircle,
   PlayCircle,
+  Users,
 } from "lucide-react";
 import type { Task, Status } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import * as Progress from "@radix-ui/react-progress";
-import React from "react";
+import React, { useState } from "react";
+import { CollaboratorForm } from "./CollabForm";
 
 interface TaskCardProps {
   task: Task;
@@ -45,6 +47,8 @@ const Taskcard = ({
   onStatusChange,
   onDelete,
 }: TaskCardProps) => {
+  const [collabOpen, setCollabOpen] = useState(false);
+
   const getStatusIcon = (status: Status) => {
     switch (status) {
       case "COMPLETED":
@@ -141,7 +145,7 @@ const Taskcard = ({
                 <span className="text-sm">Edit Task</span>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="my-1 bg-border/30" />
+              <DropdownMenuSeparator className="my-1 bg-border" />
 
               {/* Status Options */}
               <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">
@@ -172,7 +176,7 @@ const Taskcard = ({
                 <span className="text-sm">Mark as Completed</span>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="my-1 bg-border/30" />
+              <DropdownMenuSeparator className="my-1 bg-border" />
 
               {/* Delete Option */}
               <DropdownMenuItem
@@ -184,6 +188,18 @@ const Taskcard = ({
                 <Trash2 className="w-4 h-4 mr-2" />
                 <span className="text-sm">Delete Task</span>
               </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="my-1 bg-border" />
+
+              <DropdownMenuItem
+                className="flex items-center cursor-pointer px-3 py-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent/50 focus:text-accent-foreground transition-colors duration-200"
+                onClick={() => setCollabOpen(true)}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                <span className="text-sm">Add Collaborators</span>
+              </DropdownMenuItem>
+
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -195,21 +211,26 @@ const Taskcard = ({
       <CardContent className="space-y-3">
         {/*Category*/}
         <div className="flex flex-wrap gap-2">
-          {task.category && (
-            <Badge
-              variant="outline"
-              style={{ borderColor: task.category.color }}
-            >
-              {task.category.name}
-            </Badge>
+          {task.taskCategories && (
+            <div>
+              {task.taskCategories.map((cate) => (
+                <Badge
+                  key={cate.id}
+                  variant="outline"
+                  style={{ borderColor: cate.category.color }}
+                >
+                  {cate.category.name}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Tags */}
         <div>
-          {task.tags.length > 0 && (
+          {task.taskTags.length > 0 && (
             <div>
-              {task.tags.map((tag) => (
+              {task.taskTags.map((tag) => (
                 <Badge
                   key={tag.id}
                   variant="outline"
@@ -252,6 +273,12 @@ const Taskcard = ({
           )}
         </div>
       </CardContent>
+
+      <CollaboratorForm
+        taskId={task.id}
+        isOpen={collabOpen}
+        onClose={() => setCollabOpen(false)}
+      />
     </Card>
   );
 };

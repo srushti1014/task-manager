@@ -12,7 +12,7 @@ export async function GET() {
         { status: 401 }
       );
     }
-
+    
     const categories = await prisma.category.findMany({
       where: { userId: session.user.id },
       include: { tasks: true },
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: "Category already exists" },
+        { success: false, message: "Category already exists" },
         { status: 400 }
       );
     }

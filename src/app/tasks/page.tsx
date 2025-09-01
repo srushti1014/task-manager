@@ -196,7 +196,7 @@ export default function TasksPage() {
       const payload = {
         ...taskToUpdate,
         status: newStatus,
-        tagIds: taskToUpdate.tags.map((t) => t.tag.id),
+        tagIds: taskToUpdate.taskTags.map((t) => t.tag.id),
       };
 
       const { data } = await axios.put(`/api/tasks/${taskId}`, payload);

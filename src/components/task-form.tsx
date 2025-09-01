@@ -32,7 +32,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
     tagIds: [] as string[],
   })
   const [loading, setLoading] = useState(false);
-
+  
   useEffect(() => {
     if (task) {
       setFormData({
@@ -42,7 +42,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
         priority: task.priority,
         status: task.status,
         categoryId: task.categoryId || "",
-        tagIds: task.tags.map((tag) => tag.id),
+        tagIds: task.taskTags.map((tag) => tag.id),
       })
     } else {
       setFormData({
@@ -92,8 +92,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               required
             />
-          </div>
-
+          </div> 
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -130,7 +129,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
               </SelectContent>
             </Select>
           </div>
-
+          
           {task && (
             <div>
               <Label htmlFor="status">Status</Label>

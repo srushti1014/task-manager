@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Users } from "lucide-react";
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -59,6 +60,12 @@ export function Sidebar() {
       label: "Tags",
       icon: Tag,
       href: "/tags",
+    },
+    {
+      id: "collab",
+      label: "Collaborate",
+      icon: Users,
+      href: "/collab",
     },
   ];
 

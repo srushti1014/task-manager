@@ -50,38 +50,45 @@ model VerificationToken {
 }
 
 model User {
-  id            String     @id @default(uuid())
+  id            String    @id @default(uuid())
   name          String?
-  email         String?    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  tasks         Task[]
-  categories    Category[]
-  tags          Tag[]
+
+  tasks       Task[]     @relation("TaskOwner") // tasks this user owns
+  taskMembers TaskUser[] // tasks this user collaborates on
+
+  categories   Category[]
+  tags         Tag[]
+  TaskTag      TaskTag[]
+  TaskCategory TaskCategory[]
 }
 
 model Category {
-  id     String @id @default(cuid())
-  name   String @unique
-  color  String @default("#3B82F6")
-  userId String
-  createdAt DateTime   @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#3B82F6")
+  userId    String
+  createdAt DateTime @default(now())
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks Task[]
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks        Task[] // tasks user categorized
+  TaskCategory TaskCategory[]
 
   @@unique([name, userId])
 }
 
 model Tag {
-  id     String @id @default(cuid())
-  name   String @unique
-  color  String @default("#10B981")
-  createdAt DateTime   @default(now())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#10B981")
+  createdAt DateTime @default(now())
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   tasks TaskTag[]
 
@@ -93,33 +100,64 @@ model Task {
   title       String
   description String?
   dueDate     DateTime?
-  priority    Priority    @default(MEDIUM)
+  priority    Priority  @default(MEDIUM)
   status      Status    @default(PENDING)
   completedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation("TaskOwner", fields: [userId], references: [id])
 
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // Collaborators
+  collaborators TaskUser[]
 
-  tags TaskTag[]
+  // Personal organization (each user can tag/categorize separately)
+  taskTags       TaskTag[]
+  taskCategories TaskCategory[]
+  categoryId     String?
+  Category       Category?      @relation(fields: [categoryId], references: [id])
+}
+
+model TaskUser {
+  id     String           @id @default(cuid())
+  taskId String
+  userId String
+  role   CollaboratorRole @default(VIEWER)
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
 }
 
 model TaskTag {
-  id     String @id @default(cuid())
-  taskId String
-  tagId  String
-  createdAt DateTime   @default(now())
+  id        String   @id @default(cuid())
+  taskId    String
+  tagId     String
+  userId    String // who applied the tag
+  createdAt DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([taskId, tagId])
+  @@unique([taskId, tagId, userId])
+}
+
+model TaskCategory {
+  id         String   @id @default(cuid())
+  taskId     String
+  categoryId String
+  userId     String // who applied the category
+  createdAt  DateTime @default(now())
+
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, categoryId, userId])
 }
 
 enum Priority {
@@ -134,11 +172,13 @@ enum Status {
   COMPLETED
 }
 
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+enum CollaboratorRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 
 // generator client {
 //   provider = "prisma-client-js"
@@ -198,33 +238,14 @@ enum Status {
 //   tags          Tag[]
 // }
 
-// model Task {
-//   id          String    @id @default(uuid())
-//   title       String
-//   description String?
-//   dueDate     DateTime?
-//   priority    String
-//   status      Status    @default(PENDING)
-//   createdAt   DateTime  @default(now())
-//   updatedAt   DateTime  @updatedAt
-
-//   // Relations
-//   userId String
-//   user   User   @relation(fields: [userId], references: [id])
-
-//   categoryId String?
-//   category   Category? @relation(fields: [categoryId], references: [id])
-
-//   tags Tag[]
-// }
-
 // model Category {
 //   id     String @id @default(cuid())
-//   name   String @unique
+//   name   String 
 //   color  String @default("#3B82F6")
 //   userId String
-//   user   User   @relation(fields: [userId], references: [id])
+//   createdAt DateTime   @default(now())
 
+//   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 //   tasks Task[]
 
 //   @@unique([name, userId])
@@ -232,14 +253,55 @@ enum Status {
 
 // model Tag {
 //   id     String @id @default(cuid())
-//   name   String @unique
+//   name   String 
 //   color  String @default("#10B981")
+//   createdAt DateTime   @default(now())
 //   userId String
-//   user   User   @relation(fields: [userId], references: [id])
+//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-//   tasks Task[]
+//   tasks TaskTag[]
 
 //   @@unique([name, userId])
+// }
+
+// model Task {
+//   id          String    @id @default(uuid())
+//   title       String
+//   description String?
+//   dueDate     DateTime?
+//   priority    Priority    @default(MEDIUM)
+//   status      Status    @default(PENDING)
+//   completedAt DateTime?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   userId String
+//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   categoryId String?
+//   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+//   tags TaskTag[]
+// }
+
+// model TaskTag {
+//   id     String @id @default(cuid())
+//   taskId String
+//   tagId  String
+//   createdAt DateTime   @default(now())
+
+//   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+//   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+//   @@unique([taskId, tagId])
+// }
+
+// enum Priority {
+//   LOW
+//   MEDIUM
+//   HIGH
 // }
 
 // enum Status {

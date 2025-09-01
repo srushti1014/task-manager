@@ -8,7 +8,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-     const { id } = await context.params;
+    const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function GET(
 
     const task = await prisma.task.findFirst({
       where: { id: id, userId: session.user.id },
-      include: { category: true, tags: true },
+      include: { taskCategories: true, taskTags: true },
     });
 
     if (!task) {
@@ -45,7 +45,7 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-     const { id } = await context.params;
+    const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -114,6 +114,7 @@ export async function PUT(
           data: validTagIds.map((tagId: string) => ({
             taskId: id,
             tagId,
+            userId: session.user.id
           })),
         });
       }
@@ -122,8 +123,12 @@ export async function PUT(
       return tx.task.findUnique({
         where: { id: id },
         include: {
-          category: true,
-          tags: {
+          taskCategories: {
+            include: {
+              category: true,
+            },
+          },
+          taskTags: {
             include: {
               tag: true,
             },
@@ -148,7 +153,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-     const { id } = await context.params;
+    const { id } = await context.params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -159,16 +164,15 @@ export async function DELETE(
 
     await prisma.$transaction(async (tx) => {
       await tx.taskTag.deleteMany({
-        where: {taskId: id}
-      })
+        where: { taskId: id },
+      });
 
       await tx.task.delete({
-        where: {id : id}
-      })
-    })
+        where: { id: id },
+      });
+    });
 
     return NextResponse.json({ success: true, message: "Task deleted" });
-
   } catch (error) {
     console.error("Error deleting task:", error);
     return NextResponse.json(

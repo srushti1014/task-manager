@@ -29,8 +29,7 @@ export async function GET() {
       color: tag.color,
       createdAt: tag.createdAt?.toISOString().split("T")[0] || "", 
       taskCount: tag.tasks.length,
-      completedTasks: tag.tasks.filter((task) => task.task.status === "COMPLETED")
-        .length,
+      completedTasks: tag.tasks.filter((task) => task.task.status === "COMPLETED").length,
       pendingTasks: tag.tasks.filter((task) => task.task.status === "PENDING").length 
     }));
 
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: "Tag already exists" },
+        { success: false, message: "Tag already exists" },
         { status: 400 }
       );
     }
@@ -82,7 +81,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: `An unexpected error occurred: ${err.message}`,
+        message: `An unexpected error ocuured while adding tag: ${err.message}`,
       },
       { status: 500 }
     );

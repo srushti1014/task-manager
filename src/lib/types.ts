@@ -8,6 +8,13 @@ export interface TaskTag {
   tag: Tag        
 }
 
+export interface TaskCategory {
+  id: string         
+  taskId: string
+  tagId: string
+  category: Category        
+}
+
 export interface Task {
   id: string
   title: string
@@ -19,8 +26,8 @@ export interface Task {
   updatedAt: Date
   userId: string
   categoryId?: string
-  category?: Category
-  tags: TaskTag[]    
+  taskCategories?: TaskCategory[]
+  taskTags: TaskTag[]    
 }
 
 export interface Category {

@@ -65,7 +65,7 @@ export async function PUT(
 
     if (existing) {
       return NextResponse.json(
-        { error: "Tag with this name already exists" },
+        { error: "Tag with same name already exist." },
         { status: 400 }
       );
     }

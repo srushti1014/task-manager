@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
 
     //  Sorting + Pagination
     const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
+    const sortOrder =
+      (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
@@ -36,11 +37,24 @@ export async function GET(req: NextRequest) {
 
     if (status && status !== "all") where.status = status;
     if (priority && priority !== "all") where.priority = priority;
-    if (categoryId && categoryId !== "all") where.categoryId = categoryId;
+    // if (categoryId && categoryId !== "all") where.categoryId = categoryId;
+
+    if (categoryId && categoryId !== "all") {
+      where.taskCategories = {
+        some: {
+          categoryId,
+          userId: session.user.id,
+        },
+      };
+    }
 
     if (tags && tags.length > 0) {
-      where.tags = {
-        some: { tag: { name: { in: tags } } }, 
+      where.taskTags = {
+        some: {
+          tag: {
+            name: { in: tags },
+          },
+        },
       };
     }
 
@@ -65,8 +79,8 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy: { [sortBy]: sortOrder },
         include: {
-          category: true,
-          tags: { include: { tag: true } },
+          taskCategories : { include: { category: true } },
+          taskTags: { include: { tag: true } },
         },
       }),
       prisma.task.count({ where }),
@@ -88,40 +102,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// GET all tasks for logged-in user
-// export async function GET() {
-//   try {
-//     const session = await auth();
-//     if(session?.user.id){
-//       console.log("USER ID:", session.user.id);
-//     }
-//     if (!session?.user?.id) {
-//       return NextResponse.json(
-//         { success: false, message: "Unauthorized" },
-//         { status: 401 }
-//       );
-//     }
 
-//     const tasks = await prisma.task.findMany({
-//       where: { userId: session.user.id },
-//       include: {
-//         category: true,
-//         tags: {
-//           include: { tag: true }, 
-//         },
-//       },
-//       orderBy: { createdAt: "desc" },
-//     });
-
-//     return NextResponse.json({ success: true, data: tasks });
-//   } catch (error) {
-//     console.error("Error fetching tasks:", error);
-//     return NextResponse.json(
-//       { success: false, message: "Server error" },
-//       { status: 500 }
-//     );
-//   }
-// }
 
 // CREATE a task
 export async function POST(req: NextRequest) {
@@ -144,15 +125,33 @@ export async function POST(req: NextRequest) {
         priority,
         userId: session.user.id,
         categoryId,
-        tags: tagIds
+        taskTags: tagIds
           ? {
               create: tagIds.map((tagId: string) => ({
-                tag: { connect: { id: tagId } }, //tags here refers to the relation Task → TaskTag[].
+                tag: { connect: { id: tagId } },
+                user: { connect: { id: session.user.id } },
               })),
             }
           : undefined,
+        taskCategories: categoryId
+          ? {
+              create: {
+                category: { connect: { id: categoryId } },
+                user: { connect: { id: session.user.id } },
+              },
+            }
+          : undefined,
       },
-      include: { category: true, tags: { include: { tag: true } } },
+      include: {
+        taskCategories: {
+          include: {
+            category: true,
+          },
+        },
+        taskTags: {
+          include: { tag: true },
+        },
+      },
     });
 
     // taskId is auto-filled with the new Task’s id (because you’re inside task.create).
@@ -171,3 +170,39 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+
+// GET all tasks for logged-in user
+// export async function GET() {
+//   try {
+//     const session = await auth();
+//     if(session?.user.id){
+//       console.log("USER ID:", session.user.id);
+//     }
+//     if (!session?.user?.id) {
+//       return NextResponse.json(
+//         { success: false, message: "Unauthorized" },
+//         { status: 401 }
+//       );
+//     }
+
+//     const tasks = await prisma.task.findMany({
+//       where: { userId: session.user.id },
+//       include: {
+//         category: true,
+//         tags: {
+//           include: { tag: true },
+//         },
+//       },
+//       orderBy: { createdAt: "desc" },
+//     });
+
+//     return NextResponse.json({ success: true, data: tasks });
+//   } catch (error) {
+//     console.error("Error fetching tasks:", error);
+//     return NextResponse.json(
+//       { success: false, message: "Server error" },
+//       { status: 500 }
+//     );
+//   }
+// }
