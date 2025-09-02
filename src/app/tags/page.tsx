@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagForm } from "@/components/tag-form";
-import {  Plus, Tag as TagIcon, Search } from "lucide-react";
+import { Plus, Tag as TagIcon, Search } from "lucide-react";
 import { Tag, TagWithStats } from "@/lib/types";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -18,7 +18,6 @@ export default function TagsPage() {
   const [tagFormOpen, setTagFormOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const filteredTags = tags.filter((tag) =>
@@ -142,9 +141,9 @@ export default function TagsPage() {
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Completion Rate
+                  Completion Tag
                 </CardTitle>
                 <TagIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -181,7 +180,7 @@ export default function TagsPage() {
               <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search tags..."
+                  placeholder="Search tags...."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -201,15 +200,6 @@ export default function TagsPage() {
                       ? "Try adjusting your search query"
                       : "Get started by creating your first tag"}
                   </p>
-                  {!searchQuery && (
-                    <Button
-                      onClick={() => setIsCreateDialogOpen(true)}
-                      className="mt-4"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create Tag
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -238,4 +228,4 @@ export default function TagsPage() {
       />
     </div>
   );
-}
+} 

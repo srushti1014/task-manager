@@ -160,7 +160,6 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                   <SelectItem value="COMPLETED">Completed</SelectItem>
                 </SelectContent>
-                 
               </Select>
             </div>
           )}
