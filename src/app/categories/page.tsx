@@ -118,7 +118,7 @@ export default function CategoriesPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {categories.length === 0 ? (
           <Card className="p-8 text-center col-span-full">
             <div className="text-muted-foreground">

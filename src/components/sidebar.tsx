@@ -80,7 +80,7 @@ export function Sidebar() {
       {/* Mobile overlay with better styling */}
       {!isCollapsed && isMobile && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden h-full"
           onClick={handleOverlayClick}
           style={{ touchAction: "none" }} 
         />

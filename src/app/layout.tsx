@@ -36,7 +36,7 @@ export default function RootLayout({
         <SessionProvider>
           <ToastContainer />
           <AuthGuard>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <ThemeProvider  attribute="class" defaultTheme="dark" enableSystem={false}>
               <div className="flex h-screen bg-background">
                 <Sidebar />
                 <div className="flex-1 flex flex-col overflow-hidden">

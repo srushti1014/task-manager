@@ -32,7 +32,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
     tagIds: [] as string[],
   })
   const [loading, setLoading] = useState(false);
-  
+  const [errors, setErrors] = useState<{ category?: string; tags?: string }>({});
+
+
   useEffect(() => {
     if (task) {
       setFormData({
@@ -59,14 +61,27 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true); 
+    // reset errors
+    setErrors({});
+
+    // validation
+    if (!formData.categoryId || formData.categoryId === "none") {
+      setErrors((prev) => ({ ...prev, category: "Category is required" }));
+      return;
+    }
+    if (formData.tagIds.length === 0) {
+      setErrors((prev) => ({ ...prev, tags: "At least one tag is required" }));
+      return;
+    }
+
+    setLoading(true);
     try {
       await onSubmit({
         ...formData,
       })
       onClose();
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   }
 
@@ -92,7 +107,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               required
             />
-          </div> 
+          </div>
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -129,7 +144,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
               </SelectContent>
             </Select>
           </div>
-          
+
           {task && (
             <div>
               <Label htmlFor="status">Status</Label>
@@ -145,6 +160,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                   <SelectItem value="COMPLETED">Completed</SelectItem>
                 </SelectContent>
+                 
               </Select>
             </div>
           )}
@@ -154,6 +170,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
             <Select
               value={formData.categoryId}
               onValueChange={(value) => setFormData((prev) => ({ ...prev, categoryId: value }))}
+              required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
@@ -167,6 +184,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
                 ))}
               </SelectContent>
             </Select>
+             {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
           </div>
 
           <div>
@@ -184,6 +202,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, categories, tags }: 
                 </Button>
               ))}
             </div>
+            {errors.tags && <p className="text-sm text-red-500 mt-1">{errors.tags}</p>}
           </div>
 
           <div className="flex gap-2">
