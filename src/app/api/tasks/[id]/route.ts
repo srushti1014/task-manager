@@ -19,7 +19,16 @@ export async function GET(
 
     const task = await prisma.task.findFirst({
       where: { id: id, userId: session.user.id },
-      include: { taskCategories: true, taskTags: true },
+      include: { 
+        taskCategories: { 
+          include: { category: true },
+          where: { userId: session.user.id }
+        }, 
+        taskTags: { 
+          include: { tag: true },
+          where: { userId: session.user.id }
+        } 
+      },
     });
 
     if (!task) {
@@ -89,7 +98,7 @@ export async function PUT(
       validTagIds = validTags.map((tag) => tag.id);
     }
 
-    // A transaction = group of queries that run all or none.
+    // A transaction = group of queries that run all are none...
     const updatedTask = await prisma.$transaction(async (tx) => {
       await tx.task.update({
         where: { id: id },

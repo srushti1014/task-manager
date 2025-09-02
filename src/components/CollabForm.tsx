@@ -34,6 +34,7 @@ export function CollaboratorForm({
 }: CollaboratorFormProps) {
   const [emails, setEmails] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchloading, setFetchLoading] = useState(false);
   const [collaborators, setCollaborators] = useState<any[]>([]);
 
   // fetch collaborators for this task
@@ -43,12 +44,15 @@ export function CollaboratorForm({
 
   const fetchCollabprators = async () => {
     if (!isOpen) return;
+    setFetchLoading(true)
     try {
       const res = await axios.get(`/api/tasks/${taskId}/collab`);
       console.log(res);
       setCollaborators(res.data.data || []);
     } catch (err) {
       console.error("Error fetching collaborators:", err);
+    } finally {
+      setFetchLoading(false);
     }
   };
 
@@ -61,8 +65,11 @@ export function CollaboratorForm({
       });
       setEmails("");
       fetchCollabprators();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error adding collaborators:", err);
+      const message =
+        err.response?.data?.message || "Failed to update collaborator";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -80,7 +87,10 @@ export function CollaboratorForm({
       } else {
         toast.error(res.data.message || "Failed to update collaborator");
       }
-    } catch (err) {
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || "Failed to update collaborator";
+      toast.error(message);
       console.error("Error updating role:", err);
     }
   };
@@ -97,8 +107,11 @@ export function CollaboratorForm({
         toast.error(res.data.message || "Failed to update collaborator");
       }
       fetchCollabprators();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error removing collaborator:", err);
+      const message =
+        err.response?.data?.message || "Failed to update collaborator";
+      toast.error(message);
     }
   };
 
@@ -112,7 +125,7 @@ export function CollaboratorForm({
         {/* Add new collaborators */}
         <div className="space-y-4">
           <div>
-            <Label htmlFor="emails">
+            <Label htmlFor="emails" className="mb-2">
               Collaborator Emails (comma separated)
             </Label>
             <Input
@@ -144,35 +157,42 @@ export function CollaboratorForm({
               No collaborators yet.
             </p>
           )}
-          {collaborators.map((c) => (
-            <div
-              key={c.id}
-              className="flex justify-between items-center border p-2 rounded"
-            >
-              <span>{c.user.email}</span>
-              <Select
-                value={c.role}
-                onValueChange={(value) => handleRoleChange(c.user.email, value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="VIEWER">Viewer</SelectItem>
-                  <SelectItem value="EDITOR">Editor</SelectItem>
-                  <SelectItem value="OWNER">Owner</SelectItem>
-                </SelectContent>
-              </Select>
+          {fetchloading ? (
+            <>
+              <div className="text-center">Loading....</div>
+            </>
+          ) : (
+            <>
+              {collaborators.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex justify-between items-center border p-2 rounded"
+                >
+                  <span>{c.user.email}</span>
+                  <Select
+                    value={c.role}
+                    onValueChange={(value) => handleRoleChange(c.user.email, value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="VIEWER">Viewer</SelectItem>
+                      <SelectItem value="OWNER">Owner</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleRemove(c.user.email)}
-              >
-                Remove
-              </Button>
-            </div>
-          ))}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleRemove(c.user.email)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

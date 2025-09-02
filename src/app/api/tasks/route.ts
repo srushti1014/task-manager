@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
           tag: {
             name: { in: tags },
           },
+          userId: session.user.id,
         },
       };
     }
@@ -78,9 +79,19 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
+        // include: {
+        //   taskCategories : { include: { category: true } },
+        //   taskTags: { include: { tag: true } },
+        // },
         include: {
-          taskCategories : { include: { category: true } },
-          taskTags: { include: { tag: true } },
+          taskCategories: {
+            include: { category: true },
+            where: { userId: session.user.id },
+          },
+          taskTags: {
+            include: { tag: true },
+            where: { userId: session.user.id },
+          },
         },
       }),
       prisma.task.count({ where }),
@@ -102,8 +113,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-
-
 // CREATE a task
 export async function POST(req: NextRequest) {
   try {
@@ -124,20 +133,19 @@ export async function POST(req: NextRequest) {
         dueDate: dueDate ? new Date(dueDate) : null,
         priority,
         userId: session.user.id,
-        categoryId,
         taskTags: tagIds
           ? {
               create: tagIds.map((tagId: string) => ({
-                tag: { connect: { id: tagId } },
-                user: { connect: { id: session.user.id } },
+                tagId,
+                userId: session.user.id,
               })),
             }
           : undefined,
         taskCategories: categoryId
           ? {
               create: {
-                category: { connect: { id: categoryId } },
-                user: { connect: { id: session.user.id } },
+                categoryId,
+                userId: session.user.id,
               },
             }
           : undefined,
@@ -170,7 +178,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
 
 // GET all tasks for logged-in user
 // export async function GET() {

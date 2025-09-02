@@ -174,7 +174,6 @@ enum Status {
 
 enum CollaboratorRole {
   OWNER
-  EDITOR
   VIEWER
 }
 

@@ -11,8 +11,16 @@ export interface TaskTag {
 export interface TaskCategory {
   id: string         
   taskId: string
-  tagId: string
+  categoryId: string
   category: Category        
+}
+
+export interface TaskPermissions {
+  canView: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canManageCollaborators: boolean;
+  role: "OWNER" | "EDITOR" | "VIEWER" | null;
 }
 
 export interface Task {
@@ -27,7 +35,23 @@ export interface Task {
   userId: string
   categoryId?: string
   taskCategories?: TaskCategory[]
-  taskTags: TaskTag[]    
+  taskTags: TaskTag[]
+  permissions?: TaskPermissions
+  user?: {
+    id: string;
+    name?: string;
+    email?: string;
+  }
+  collaborators?: Array<{
+    userId: string;
+    role: "OWNER" | "EDITOR" | "VIEWER";
+    user: {
+      id: string;
+      name?: string;
+      email?: string;
+    }
+  }>
+  currentUserRole?: string;
 }
 
 export interface Category {

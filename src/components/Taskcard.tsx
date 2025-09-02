@@ -27,12 +27,14 @@ import {
   PauseCircle,
   PlayCircle,
   Users,
+  Tags,
 } from "lucide-react";
 import type { Task, Status } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import * as Progress from "@radix-ui/react-progress";
 import React, { useState } from "react";
 import { CollaboratorForm } from "./CollabForm";
+import PersonalizeForm from "./PersonalizeForm";
 
 interface TaskCardProps {
   task: Task;
@@ -48,6 +50,7 @@ const Taskcard = ({
   onDelete,
 }: TaskCardProps) => {
   const [collabOpen, setCollabOpen] = useState(false);
+  const [personalizeOpen, setPersonalizeOpen] = useState(false);
 
   const getStatusIcon = (status: Status) => {
     switch (status) {
@@ -120,6 +123,7 @@ const Taskcard = ({
               {task.priority}
             </Badge>
           </div>
+          {task.currentUserRole !== "VIEWER" && 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -199,9 +203,37 @@ const Taskcard = ({
                 <span className="text-sm">Add Collaborators</span>
               </DropdownMenuItem>
 
+              {/* Only show Personalize button for collaborative tasks */}
+              {task.collaborators && task.collaborators.length > 0 && (
+                <>
+                  <DropdownMenuSeparator className="my-1 bg-border" />
+
+                  <DropdownMenuItem
+                    className="flex items-center cursor-pointer px-3 py-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent/50 focus:text-accent-foreground transition-colors duration-200"
+                    onClick={() => setPersonalizeOpen(true)}
+                  >
+                    <Tags className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Personalize for Me</span>
+                  </DropdownMenuItem>
+                </>
+              )}
 
             </DropdownMenuContent>
           </DropdownMenu>
+          }
+
+          {/* Show Personalize button for viewers on collaborative tasks */}
+          {task.currentUserRole === "VIEWER" && task.collaborators && task.collaborators.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPersonalizeOpen(true)}
+              className="text-xs"
+            >
+             <Tags className="mr-1" />
+              Personalize
+            </Button>
+          )}
         </div>
         <CardTitle className="text-lg">{task.title}</CardTitle>
         <CardDescription className="line-clamp-2">
@@ -209,10 +241,11 @@ const Taskcard = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+
         {/*Category*/}
-        <div className="flex flex-wrap gap-2">
+        <div>
           {task.taskCategories && (
-            <div>
+            <div className="flex flex-wrap gap-2">
               {task.taskCategories.map((cate) => (
                 <Badge
                   key={cate.id}
@@ -278,6 +311,12 @@ const Taskcard = ({
         taskId={task.id}
         isOpen={collabOpen}
         onClose={() => setCollabOpen(false)}
+      />
+
+      <PersonalizeForm
+        taskId={task.id}
+        isOpen={personalizeOpen}
+        onClose={() => setPersonalizeOpen(false)}
       />
     </Card>
   );

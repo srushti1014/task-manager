@@ -96,8 +96,6 @@ export async function GET(
   }
 }
 
-
-
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -177,10 +175,43 @@ export async function PUT(
 
     const { email, role } = await req.json();
 
+    // Validate role
+    if (!["VIEWER", "EDITOR", "OWNER"].includes(role)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid role" },
+        { status: 400 }
+      );
+    }
+
+    // Ensure current user is owner of the task
+    const task = await prisma.task.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!task || task.userId !== session.user.id) {
+      return NextResponse.json(
+        { success: false, message: "Only task owner can modify collaborators" },
+        { status: 403 }
+      );
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Ensure user is actually a collaborator on this task
+    const existingCollab = await prisma.taskUser.findUnique({
+      where: { taskId_userId: { taskId: id, userId: user.id } },
+    });
+
+    if (!existingCollab) {
+      return NextResponse.json(
+        { success: false, message: "User is not a collaborator on this task" },
         { status: 404 }
       );
     }
@@ -218,10 +249,36 @@ export async function DELETE(
 
     const { email } = await req.json();
 
+    // Ensure current user is owner of the task
+    const task = await prisma.task.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!task || task.userId !== session.user.id) {
+      return NextResponse.json(
+        { success: false, message: "Only task owner can remove collaborators" },
+        { status: 403 }
+      );
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Ensure user is actually a collaborator on this task
+    const existingCollab = await prisma.taskUser.findUnique({
+      where: { taskId_userId: { taskId: id, userId: user.id } },
+      select: { id: true },
+    });
+
+    if (!existingCollab) {
+      return NextResponse.json(
+        { success: false, message: "User is not a collaborator on this task" },
         { status: 404 }
       );
     }
@@ -244,3 +301,4 @@ export async function DELETE(
     );
   }
 }
+
