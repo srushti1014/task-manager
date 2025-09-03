@@ -61,7 +61,7 @@ export function CollaboratorForm({
     try {
       await axios.post(`/api/tasks/${taskId}/collab`, {
         emails: emails.split(",").map((e) => e.trim()),
-        role: "EDITOR",
+        role: "VIEWER",
       });
       setEmails("");
       fetchCollabprators();
@@ -169,26 +169,28 @@ export function CollaboratorForm({
                   className="flex justify-between items-center border p-2 rounded"
                 >
                   <span>{c.user.email}</span>
-                  <Select
-                    value={c.role}
-                    onValueChange={(value) => handleRoleChange(c.user.email, value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="VIEWER">Viewer</SelectItem>
-                      <SelectItem value="OWNER">Owner</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Select
+                      value={c.role}
+                      onValueChange={(value) => handleRoleChange(c.user.email, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VIEWER">Viewer</SelectItem>
+                        <SelectItem value="OWNER">Owner</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRemove(c.user.email)}
-                  >
-                    Remove
-                  </Button>
+                    {c.role !== "OWNER" && (<Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRemove(c.user.email)}
+                    >
+                      Remove
+                    </Button>)}
+                  </div>
                 </div>
               ))}
             </>

@@ -20,7 +20,7 @@ export interface TaskPermissions {
   canEdit: boolean;
   canDelete: boolean;
   canManageCollaborators: boolean;
-  role: "OWNER" | "EDITOR" | "VIEWER" | null;
+  role: "OWNER" | "VIEWER" | null;
 }
 
 export interface Task {
@@ -44,7 +44,7 @@ export interface Task {
   }
   collaborators?: Array<{
     userId: string;
-    role: "OWNER" | "EDITOR" | "VIEWER";
+    role: "OWNER" | "VIEWER";
     user: {
       id: string;
       name?: string;

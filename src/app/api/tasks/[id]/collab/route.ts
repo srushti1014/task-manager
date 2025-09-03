@@ -144,7 +144,7 @@ export async function POST(
       data: users.map((u) => ({
         taskId,
         userId: u.id,
-        role: role || "EDITOR",
+        role: role || "VIEWER",
       })),
       skipDuplicates: true, // avoid duplicate rows
     });

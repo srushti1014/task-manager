@@ -25,17 +25,11 @@ export async function GET() {
           {
             AND: [
               { userId: session.user.id },
-              { collaborators: { some: {} } }, // means: has at least one collaborator
+              { collaborators: { some: {} } }, 
             ],
           },
         ],
       },
-      // include: {
-      //   user: true,
-      //   taskCategories: { include: { category: true } },
-      //   taskTags: { include: { tag: true } },
-      //   collaborators: { include: { user: true } },
-      // },
       include: {
         user: true,
         taskCategories: {

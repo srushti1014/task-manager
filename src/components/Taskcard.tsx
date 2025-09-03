@@ -267,7 +267,7 @@ const Taskcard = ({
                 <Badge
                   key={tag.id}
                   variant="outline"
-                  className="text-xs mr-2"
+                  className="text-xs mr-2 mt-1"
                   style={{ borderColor: tag.tag.color }}
                 >
                   {tag.tag.name}
