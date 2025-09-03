@@ -46,11 +46,17 @@ interface TasksClientProps {
   initialTasks: Task[];
   initialCategories: Category[];
   initialTags: Tag[];
+  initialTotalPages: number;
+  initialTotalTasks: number;
 }
 
-export default function TasksClient({ initialTasks, initialCategories, initialTags }: TasksClientProps) {
-
-  console.log("taskkkk",initialTasks)
+export default function TasksClient({
+  initialTasks,
+  initialCategories,
+  initialTags,
+  initialTotalPages,
+  initialTotalTasks,
+}: TasksClientProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [tags, setTags] = useState<Tag[]>(initialTags);
@@ -71,6 +77,10 @@ export default function TasksClient({ initialTasks, initialCategories, initialTa
     toDate: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [totalTasks, setTotalTasks] = useState(initialTotalTasks);
 
   useEffect(() => {
     async function loadData() {
@@ -88,7 +98,19 @@ export default function TasksClient({ initialTasks, initialCategories, initialTa
       setLoading(false);
     }
     loadData();
-  }, [filters]);
+  }, [filters, page, limit]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [
+    filters.status,
+    filters.priority,
+    filters.categoryId,
+    filters.tags,
+    filters.search,
+    filters.fromDate,
+    filters.toDate,
+  ]);
 
   // ------------------ Fetchers ------------------
   const fetchTasks = async () => {
@@ -105,17 +127,25 @@ export default function TasksClient({ initialTasks, initialCategories, initialTa
       if (filters.search) params.append("search", filters.search);
       if (filters.fromDate) params.append("fromDate", filters.fromDate);
       if (filters.toDate) params.append("toDate", filters.toDate);
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
 
       const { data } = await axios.get(`/api/tasks?${params.toString()}`);
       console.log("Tasks : ", data);
       if (data.success) {
         setTasks(data.data);
+        setTotalPages(data.totalPages);
+        setTotalTasks(data.total);
       } else {
         setTasks([]);
+        setTotalPages(1);
+        setTotalTasks(0);
       }
     } catch (error) {
       console.error("Failed to fetch tasks :", error);
       setTasks([]);
+      setTotalPages(1);
+      setTotalTasks(0);
     }
   };
 
@@ -493,19 +523,42 @@ export default function TasksClient({ initialTasks, initialCategories, initialTa
         {tasks.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => {
-              return (
-                <Taskcard
-                  key={task.id}
-                  task={task}
-                  onEdit={handleEditingTask}
-                  onStatusChange={handleStatusChange}
-                  onDelete={handleDeleteClick}
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {tasks.map((task) => {
+                return (
+                  <Taskcard
+                    key={task.id}
+                    task={task}
+                    onEdit={handleEditingTask}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDeleteClick}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex justify-center gap-2 mt-6">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((prev) => prev - 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+
+              <span className="px-2">
+                Page {page} of {totalPages} ({totalTasks} total tasks)
+              </span>
+
+              <button
+                disabled={page === totalPages || totalPages === 0}
+                onClick={() => setPage((prev) => prev + 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </div>
 

@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const sortOrder =
       (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "1000");
+    const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
     //  Where condition

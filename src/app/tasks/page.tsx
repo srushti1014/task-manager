@@ -27,6 +27,9 @@ export default async function TasksPage() {
     }
   });
 
+  params.append("page", "1");
+  params.append("limit", "10");
+
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
   const [tasksRes, categoriesRes, tagsRes] = await Promise.all([
@@ -39,7 +42,11 @@ export default async function TasksPage() {
   const categories: Category[] = categoriesRes.success ? categoriesRes.data : [];
   const tags: Tag[] = tagsRes.success ? tagsRes.data : [];
 
-  return <TasksClient initialTasks={tasks} initialCategories={categories} initialTags={tags} />;
+  const totalPages: number = tasksRes.success ? tasksRes.totalPages : 1;
+  const totalTasks: number = tasksRes.success ? tasksRes.total : 0;
+
+  return <TasksClient initialTasks={tasks} initialCategories={categories} initialTags={tags} initialTotalPages={totalPages}
+      initialTotalTasks={totalTasks}/>;
 }
 
 
