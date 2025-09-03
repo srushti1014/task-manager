@@ -176,7 +176,10 @@ export default function TagsPage() {
 
           {/* Search */}
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <div>Search Tag</div>
+            </CardHeader>
+            <CardContent>
               <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
